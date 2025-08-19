@@ -3,6 +3,7 @@ package repository.impl;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.TypedQuery;
 import model.ArtWork;
 import repository.ArtWorkRepository;
 import util.EntityManagerProvider;
@@ -45,14 +46,14 @@ public class ArtWorkRepositoryImpl implements ArtWorkRepository {
 
     @Override
     public List<ArtWork> findByArtistName(String artistName) {
-        return EntityManagerProvider.getEntityManager()
-                .createQuery("select a from ArtWork a where a.artist like %artist", ArtWork.class).getResultList();
-//        try {
-//            return Optional.ofNullable(emp.getEntityManager().find(Orders.class,customerName));
-//
-//        } catch (Exception e) {
-//            return Optional.empty();
-//        }
+        EntityManager em = emp.getEntityManager();
+        try {
+            TypedQuery<ArtWork> query = em.createQuery("select a from ArtWork a where a.artist Like :artistName", ArtWork.class);
+            query.setParameter("artistName", "%" + artistName + "%");
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
     }
 
     @Override
